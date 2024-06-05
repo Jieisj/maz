@@ -6,12 +6,12 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class TableField {
-    private String field;
+public class Field {
+    private String name;
     private String sqlType;
     private boolean canNull;
     private String key;
-    private String default_;
+    private String defaultValue;
     private String extra;
     private String comment;
     private boolean autoIncrement;

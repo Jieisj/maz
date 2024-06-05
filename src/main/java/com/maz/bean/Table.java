@@ -12,8 +12,8 @@ import java.util.Map;
 public class Table {
     private String name;
     private String comment;
-    private List<TableField> fields;
-    private Map<String, List<TableField>> indexMap;
+    private List<Field> fields;
+    private Map<String, List<Field>> indexMap;
     private String beanName;
     private String pojoParamName;
     private String queryParamName;
