@@ -1,6 +1,8 @@
 package com.maz.app;
 
 import com.maz.bean.Table;
+import com.maz.builder.POJOBuilder;
+import com.maz.builder.QueryBuilder;
 import com.maz.builder.TableBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,13 +14,14 @@ public class Application {
     public static void main(String[] args) {
         long time = System.nanoTime();
         try {
-            Application.class.getClassLoader().loadClass("utils.Property");
+            Application.class.getClassLoader().loadClass("com.maz.util.Property");
         }catch (Exception e){
-            logger.info("Load Property File Failed !");
+            logger.info("Load Property File Failed!");
         }
-        Set<Table> table = TableBuilder.getTable();
-        System.out.println(table);
-        long timeSpend  = time - System.nanoTime();
+        Set<Table> tables = TableBuilder.getTable();
+        POJOBuilder.buildPojoFromTables(tables);
+        QueryBuilder.buildQueryFromTables(tables);
+        long timeSpend  = System.nanoTime() - time;
         logger.info("Application Finished in {} ns", timeSpend);
     }
 }

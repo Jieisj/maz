@@ -4,7 +4,7 @@ public class StringConvertor {
     public static String upperCaseFirstLetter(String s) {
         if (!s.isEmpty()) {
             char c = Character.toUpperCase(s.charAt(0));
-            return s.replace(c,s.charAt(0));
+            return s.replace(s.charAt(0), c);
         }
         return "";
     }
@@ -33,4 +33,18 @@ public class StringConvertor {
         }
     }
 
+    public static String removeAndConcatCamel(String str, String regex){
+        if (str.contains(regex)){
+            String[] words = str.split(regex);
+            StringBuilder sb = new StringBuilder();
+            sb.append(words[0]);
+            for (int i = 1; i < words.length; i++) {
+                String word = words[i];
+                String upperWord = upperCaseFirstLetter(word);
+                sb.append(upperWord);
+            }
+            return sb.toString();
+        }
+        return str;
+    }
 }

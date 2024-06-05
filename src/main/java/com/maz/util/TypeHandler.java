@@ -1,5 +1,6 @@
 package com.maz.util;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class TypeHandler {
         typeMap.put("BigDecimal", BigDecimal);
         typeMap.put("Double", Double);
         typeMap.put("Date", Date);
-        typeMap.put("DateTime", DateTime);
+        typeMap.put("LocalDateTime", DateTime);
     }
     static{
         mapType();
@@ -45,7 +46,7 @@ public class TypeHandler {
             String[] value = entry.getValue();
             for(String type : value){
                  if (type.equals(sqlType)){
-                     return type;
+                     return entry.getKey();
                  }
             }
         }

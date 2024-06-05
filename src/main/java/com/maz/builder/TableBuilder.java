@@ -32,6 +32,7 @@ public class TableBuilder {
     }
 
     public static Set<Table> getTable() {
+        Set<Table> tableSet = new HashSet<>();
         String sqlType = StringConvertor.upperCaseFirstLetter(Property.getSqlType());
         logger.info("Start Building Tables From {} Connection...", sqlType);
         logger.info("^^^^^^^^^^^^^^^^^^^ Table ^^^^^^^^^^^^^^^^^^^");
@@ -59,12 +60,13 @@ public class TableBuilder {
                 logger.info("Table Data : {}", t);
                 getTableField(t);
                 getTableIndex(t);
+                tableSet.add(t);
             }
             logger.info("------------------ Table Build End --------------------");
         } catch (Exception e) {
             logger.error("Retrieving Table Data Failed");
         }
-        return null;
+        return tableSet;
     }
 
     private static void getTableIndex(Table table) {
@@ -107,6 +109,7 @@ public class TableBuilder {
             List<Field> fieldList = new ArrayList<>();
             while (rs.next()) {
                 Field field = new Field();
+
                 String name = rs.getString("Field");
                 String type = procVarType(rs.getString("Type"));
                 String defValue = rs.getString("Default");
@@ -116,6 +119,7 @@ public class TableBuilder {
                 String extra = rs.getString("Extra");
                 String javaType = TypeHandler.typeConversion(type);
                 boolean autoIncrement = isExtraAutoIncrement(extra);
+
                 field.setName(name);
                 field.setSqlType(type);
                 field.setDefaultValue(defValue);
@@ -125,7 +129,8 @@ public class TableBuilder {
                 field.setExtra(extra);
                 field.setJavaType(javaType);
                 field.setAutoIncrement(autoIncrement);
-                field.setPropertyName(StringConvertor.removeAndConcat(name, "_", true));
+                field.setPropertyName(StringConvertor.removeAndConcatCamel(name, "_"));
+
                 if (ArrayUtils.contains(TypeHandler.DateTime, type)) {
                     table.setHaveDateTime(true);
                 }
@@ -146,12 +151,16 @@ public class TableBuilder {
     }
 
     private static String procBeanName(String str, boolean ignorePrefix) {
-        String regex = "_";
-        if (ignorePrefix) {
-            String words = StringConvertor.ignorePrefix(str, regex);
-            return StringConvertor.removeAndConcat(words, regex, true);
-        } else {
-            return StringConvertor.removeAndConcat(str, regex, true);
+        if (str.contains("_")){
+            String regex = "_";
+            if (ignorePrefix) {
+                String words = StringConvertor.ignorePrefix(str, regex);
+                return StringConvertor.removeAndConcat(words, regex, true);
+            } else {
+                return StringConvertor.removeAndConcat(str, regex, true);
+            }
+        }else {
+            return StringConvertor.upperCaseFirstLetter(str);
         }
     }
 
