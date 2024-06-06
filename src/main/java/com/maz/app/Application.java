@@ -1,9 +1,9 @@
 package com.maz.app;
 
-import com.maz.bean.Table;
-import com.maz.builder.POJOBuilder;
-import com.maz.builder.QueryBuilder;
-import com.maz.builder.TableBuilder;
+import com.maz.builder.Mapper;
+import com.maz.builder.POJO;
+import com.maz.builder.Query;
+import com.maz.builder.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +18,10 @@ public class Application {
         }catch (Exception e){
             logger.info("Load Property File Failed!");
         }
-        Set<Table> tables = TableBuilder.getTable();
-        POJOBuilder.buildPojoFromTables(tables);
-        QueryBuilder.buildQueryFromTables(tables);
+        Set<com.maz.bean.Table> tables = Table.getTable();
+        POJO.buildPOJOFromTables(tables);
+        Query.buildQueryFromTables(tables);
+        Mapper.buildMapperFromTables(tables);
         long timeSpend  = System.nanoTime() - time;
         logger.info("Application Finished in {} ns", timeSpend);
     }

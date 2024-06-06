@@ -1,26 +1,24 @@
 package com.maz.builder;
 
-import com.maz.bean.Field;
 import com.maz.bean.Table;
 import com.maz.util.Constructor;
 import com.maz.util.Property;
-import com.maz.util.StringConvertor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.Set;
 
-public class POJOBuilder {
+public class POJO {
     private static final Logger logger = LoggerFactory.getLogger("builder.POJOBuilder");
     public static void buildPOJO(Table table){
         //properties
         String poPath = Property.getPoPath();
         boolean isIgnoreComm = Property.getPOJOIgnoreComment();
 
-        String pojoParamName = table.getPojoParamName();
+        String className = table.getPojoParamName();
         File dirs = new File(poPath);
-        File javaPo = new File(poPath + "/" + pojoParamName + ".java");
+        File poJava = new File(poPath + "/" + className + ".java");
 
         logger.info("---------------------------------------------------------------");
         if (dirs.mkdirs()){
@@ -29,15 +27,15 @@ public class POJOBuilder {
             logger.info("POJO Directors Have Existed");
         }
         try {
-            if (javaPo.createNewFile()){
+            if (poJava.createNewFile()){
                 logger.info("POJO Java File Created");
             }else {
                 logger.info("POJO Java File Have Existed");
             }
-            try(OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(javaPo));
+            try(OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(poJava));
                 BufferedWriter bw = new BufferedWriter(outputStreamWriter)) {
                 String importInfo = Constructor.consPoOrQueryImport(table);
-                String constructedPOJO = Constructor.construct(table, table.getPojoParamName(), Property.getPoPackage(), importInfo, isIgnoreComm);
+                String constructedPOJO = Constructor.constructEntity(table, table.getPojoParamName(), Property.getPoPackage(), importInfo, isIgnoreComm);
                 bw.write(constructedPOJO);
                 bw.flush();
             }catch (IOException e){
@@ -48,19 +46,19 @@ public class POJOBuilder {
         }
     }
 
-    public static void buildPojoFromTables(Set<Table> tables){
-        logger.info("------------------------------Pojo-----------------------------");
+    public static void buildPOJOFromTables(Set<Table> tables){
+        logger.info("------------------------------POJO-----------------------------");
         logger.info("Initializing Building Pojo...");
-        logger.info("PathSource: {}", Property.getSourcePath());
-        logger.info("PathResources: {}", Property.getResourcePath());
-        logger.info("PackageBase: {}", Property.getBasePackage());
+        logger.info("SourcePath: {}", Property.getSourcePath());
+        logger.info("ResourcesPath: {}", Property.getResourcePath());
+        logger.info("BasePackage: {}", Property.getBasePackage());
         logger.info("PoPackage: {}", Property.getPoPackage());
-        logger.info("PathPo: {}", Property.getPoPath());
+        logger.info("PoPath: {}", Property.getPoPath());
         logger.info("Start Building...");
         for(Table table : tables){
             buildPOJO(table);
         }
-        logger.info("------------------------------Pojo End-------------------------");
+        logger.info("------------------------------POJO End-------------------------");
     }
 
 }

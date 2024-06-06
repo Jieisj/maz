@@ -1,6 +1,5 @@
 package com.maz.builder;
 
-import com.maz.bean.Table;
 import com.maz.bean.Field;
 import com.maz.util.Property;
 import com.maz.util.StringConvertor;
@@ -12,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.*;
 
-public class TableBuilder {
+public class Table {
     private static final Logger logger = LoggerFactory.getLogger("builder.TableBuilder");
     private static final String SHOW_TABLE_STATUS = "SHOW TABLE STATUS";
     public static final String SHOW_FIELD_FROM = "SHOW FULL FIELDS FROM ";
@@ -31,8 +30,8 @@ public class TableBuilder {
         }
     }
 
-    public static Set<Table> getTable() {
-        Set<Table> tableSet = new HashSet<>();
+    public static Set<com.maz.bean.Table> getTable() {
+        Set<com.maz.bean.Table> tableSet = new HashSet<>();
         String sqlType = StringConvertor.upperCaseFirstLetter(Property.getSqlType());
         logger.info("Start Building Tables From {} Connection...", sqlType);
         logger.info("^^^^^^^^^^^^^^^^^^^ Table ^^^^^^^^^^^^^^^^^^^");
@@ -48,7 +47,7 @@ public class TableBuilder {
                 String tableComment = rs.getString("Comment");
                 logger.info("------------------Table------------------");
                 logger.info("Table: {} Starting Retrieving Data...", tableName);
-                Table t = new Table();
+                com.maz.bean.Table t = new com.maz.bean.Table();
                 t.setName(tableName);
                 t.setComment(tableComment);
                 t.setHaveDateTime(false);
@@ -69,7 +68,7 @@ public class TableBuilder {
         return tableSet;
     }
 
-    private static void getTableIndex(Table table) {
+    private static void getTableIndex(com.maz.bean.Table table) {
         try(PreparedStatement ps = conn.prepareStatement(SHOW_INDEX_FROM + table.getName());
             ResultSet rs = ps.executeQuery())
         {
@@ -100,7 +99,7 @@ public class TableBuilder {
         }
     }
 
-    private static void getTableField(Table table) {
+    private static void getTableField(com.maz.bean.Table table) {
         try (
                 PreparedStatement ps = conn.prepareStatement(SHOW_FIELD_FROM + table.getName());
                 ResultSet rs = ps.executeQuery();

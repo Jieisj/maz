@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.Set;
 
-public class QueryBuilder {
-    private static final Logger logger = LoggerFactory.getLogger("builder.POJOBuilder");
+public class Query {
+    private static final Logger logger = LoggerFactory.getLogger("builder.QueryBuilder");
     private static void buildQuery(Table table){
         //properties
         String queryPath = Property.getQueryPath();
@@ -19,6 +19,7 @@ public class QueryBuilder {
         File dirs = new File(queryPath);
         String queryParamName = table.getQueryParamName();
         File javaQuery = new File(queryPath + "/" + queryParamName + ".java");
+        System.out.println(queryParamName);
         logger.info("---------------------------------------------------------------");
 
         //create file
@@ -36,7 +37,7 @@ public class QueryBuilder {
             try(OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(javaQuery));
                 BufferedWriter bw = new BufferedWriter(outputStreamWriter)) {
                 String importInfo = Constructor.consPoOrQueryImport(table);
-                String constructedQuery = Constructor.construct(table, table.getQueryParamName(), Property.getQueryPackage(), importInfo, isIgnoreComm);
+                String constructedQuery = Constructor.constructEntity(table, table.getQueryParamName(), Property.getQueryPackage(), importInfo, isIgnoreComm);
                 bw.write(constructedQuery);
                 bw.flush();
             }catch (IOException e){
@@ -51,10 +52,9 @@ public class QueryBuilder {
         logger.info("------------------------------Query-----------------------------");
         logger.info("Initializing Building Query...");
         logger.info("PathSource: {}", Property.getSourcePath());
-        logger.info("PathResources: {}", Property.getResourcePath());
         logger.info("PackageBase: {}", Property.getBasePackage());
         logger.info("QueryPackage: {}", Property.getQueryPackage());
-        logger.info("PathQuery: {}", Property.getQueryPath());
+        logger.info("QueryPath: {}", Property.getQueryPath());
         logger.info("Start Building...");
         for(Table table : tables){
             buildQuery(table);

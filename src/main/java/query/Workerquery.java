@@ -1,13 +1,9 @@
-package pojo;
+package query;
 
-public class WorkerHello {
-	/**  */
+public class Workerquery {
 	private String name;
-	/**  */
 	private Double weight;
-	/**  */
 	private Integer department;
-	/**  */
 	private String gender;
 
 	public void setName(String name){

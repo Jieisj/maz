@@ -1,27 +1,17 @@
-package pojo;
+package query;
 import java.util.Date;
 import java.time.LocalDateTime;
 
-public class UserHello {
-	/** 主键ID */
+public class Userquery {
 	private Integer id;
-	/** 姓名 */
 	private String name;
-	/** 年龄 */
 	private Integer age;
-	/** 邮箱 */
 	private String email;
-	/**  */
 	private String address;
-	/**  */
 	private String zipcode;
-	/**  */
 	private Double weight;
-	/**  */
 	private String haveHouse;
-	/**  */
 	private Date date;
-	/**  */
 	private LocalDateTime time;
 
 	public void setId(Integer id){

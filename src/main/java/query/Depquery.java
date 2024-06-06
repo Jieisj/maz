@@ -1,11 +1,8 @@
-package pojo;
+package query;
 
-public class DepHello {
-	/**  */
+public class Depquery {
 	private Integer depId;
-	/**  */
 	private String depName;
-	/**  */
 	private Integer depPeopNum;
 
 	public void setDepID(Integer depId){

@@ -9,7 +9,7 @@ public class Constructor {
     private static final String DECIMAL_PACKAGE = "java.math.BigDecimal";
     private static final String DATE_PACKAGE = "java.util.Date";
     private static final String DATE_TIME_PACKAGE = "java.time.LocalDateTime";
-    private static String consPackage(String pack){
+    public static String consPackage(String pack){
         return String.format("package %s;", pack);
     }
 
@@ -17,11 +17,13 @@ public class Constructor {
         return String.format("import %s;",importPack);
     }
 
-    public static String construct(Table table, String className, String packageInfo, String importInfo, boolean isIgnoreComment){
+    public static String constructEntity(Table table, String className, String packageInfo, String importInfo, boolean isIgnoreComment){
         StringBuilder contentBuilder = new StringBuilder();
         String packageInfos = Constructor.consPackage(packageInfo) + "\n";
         String fieldsLine = Constructor.consField(table, isIgnoreComment);
         contentBuilder.append(fieldsLine);
+        contentBuilder.append(consSetter(table.getFields()));
+        contentBuilder.append(consGetter(table.getFields()));
         contentBuilder.append(consToString(table));
         return Constructor.consEntity(className, packageInfos, importInfo, contentBuilder.toString());
     }
@@ -92,16 +94,31 @@ public class Constructor {
     private static String consComment(Field field){
         return "\t/** " + field.getComment() + " */\n";
     }
-    private static String consSetter(Table table){
-        return null;
+    private static String consSetter(List<Field> fields){
+        StringBuilder sb = new StringBuilder();
+        for (Field field : fields){
+            String propertyName = StringConvertor.upperCaseFirstLetter(field.getPropertyName());
+            String javaType = field.getJavaType();
+            String variable = field.getPropertyName();
+            String functionBody = String.format("\tthis.%s = %s;", field.getPropertyName(), variable);
+            String setter = String.format("\n\tpublic void set%s(%s %s){\n\t %s \n\t}", propertyName, javaType, variable, functionBody);
+            sb.append(setter);
+        }
+        return sb.toString();
     }
 
-    private static String consGetter(Table table){
-        return null;
+    private static String consGetter(List<Field> fields){
+        StringBuilder sb = new StringBuilder();
+        for (Field field : fields){
+            String propertyName = StringConvertor.upperCaseFirstLetter(field.getPropertyName());
+            String javaType = field.getJavaType();
+            String functionBody = String.format("\treturn this.%s;", field.getPropertyName());
+            String getter = String.format("\n\tpublic %s get%s(){\n\t %s \n\t}", javaType, propertyName, functionBody);
+            sb.append(getter);
+        }
+        return sb.toString();
     }
     private static String consEntity(Table table, String packageInfo, String importInfo, boolean useLombok){
-
-
         return null;
     }
 }
