@@ -17,15 +17,28 @@ public class Constructor {
         return String.format("import %s;",importPack);
     }
 
-    public static String constructEntity(Table table, String className, String packageInfo, String importInfo, boolean isIgnoreComment){
-        StringBuilder contentBuilder = new StringBuilder();
-        String packageInfos = Constructor.consPackage(packageInfo) + "\n";
-        String fieldsLine = Constructor.consField(table, isIgnoreComment);
-        contentBuilder.append(fieldsLine);
-        contentBuilder.append(consSetter(table.getFields()));
-        contentBuilder.append(consGetter(table.getFields()));
-        contentBuilder.append(consToString(table));
-        return Constructor.consEntity(className, packageInfos, importInfo, contentBuilder.toString());
+    public static String constructEntity(Table table, String className, String extend, String packageInfo, String importInfo, boolean isIgnoreComment, boolean useLombok){
+        if (!useLombok){
+            StringBuilder contentBuilder = new StringBuilder();
+            String packageInfos = Constructor.consPackage(packageInfo) + "\n";
+            String fieldsLine = Constructor.consField(table, isIgnoreComment);
+            contentBuilder.append(fieldsLine);
+            contentBuilder.append(consSetter(table.getFields()));
+            contentBuilder.append(consGetter(table.getFields()));
+            contentBuilder.append("\n");
+            contentBuilder.append(consToString(table));
+            return Constructor.consEntity(className,extend,packageInfos, importInfo,"",contentBuilder.toString());
+        }else {
+            StringBuilder contentBuilder = new StringBuilder();
+            String packageInfos = Constructor.consPackage(packageInfo) + "\n";
+            importInfo = importInfo + "import lombok.Getter;\n";
+            importInfo = importInfo + "import lombok.Setter;\n";
+            importInfo = importInfo + "import lombok.ToString;\n";
+            String fieldsLine = Constructor.consField(table, isIgnoreComment);
+            contentBuilder.append(fieldsLine);
+            String annotation = "@Getter\n" + "@Setter\n" + "@ToString";
+            return  Constructor.consEntity(className, extend, packageInfos, importInfo, annotation, contentBuilder.toString());
+        }
     }
 
     private static String consField(Table table, boolean isIgnoreComm){
@@ -46,18 +59,21 @@ public class Constructor {
             return stringBuilder.toString();
         }
     }
-    private static String consEntity(String className, String packageInfo, String importInfo, String content){
+    private static String consEntity(String className, String extend, String packageInfo, String importInfo, String annotation, String content){
         StringBuilder sb = new StringBuilder();
-        String start = String.format("\npublic class %s {\n", className);
+        if (extend == null){
+            extend = "";
+        }
+        String start = String.format("\npublic class %s%s{\n", className, extend);
         String close = "}";
         if (packageInfo.isEmpty() && importInfo.isEmpty()){
             sb.append(start).append(content).append(close);
             return sb.toString();
         }
         if (!packageInfo.isEmpty() && importInfo.isEmpty()){
-            sb.append(packageInfo).append(start).append(content).append(close);
+            sb.append(packageInfo).append(annotation).append(start).append(content).append(close);
         }else {
-            sb.append(packageInfo).append(importInfo).append(start).append(content).append(close);
+            sb.append(packageInfo).append(importInfo).append(annotation).append(start).append(content).append(close);
         }
         return sb.toString();
     }
@@ -117,8 +133,5 @@ public class Constructor {
             sb.append(getter);
         }
         return sb.toString();
-    }
-    private static String consEntity(Table table, String packageInfo, String importInfo, boolean useLombok){
-        return null;
     }
 }

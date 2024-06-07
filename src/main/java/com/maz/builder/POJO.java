@@ -14,6 +14,7 @@ public class POJO {
     public static void buildPOJO(Table table){
         //properties
         String poPath = Property.getPoPath();
+        boolean useLombok = Property.getUseLombok();
         boolean isIgnoreComm = Property.getPOJOIgnoreComment();
 
         String className = table.getPojoParamName();
@@ -35,7 +36,8 @@ public class POJO {
             try(OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(poJava));
                 BufferedWriter bw = new BufferedWriter(outputStreamWriter)) {
                 String importInfo = Constructor.consPoOrQueryImport(table);
-                String constructedPOJO = Constructor.constructEntity(table, table.getPojoParamName(), Property.getPoPackage(), importInfo, isIgnoreComm);
+                String constructedPOJO = Constructor.constructEntity
+                        (table, table.getPojoParamName(), null, Property.getPoPackage(), importInfo, isIgnoreComm,useLombok);
                 bw.write(constructedPOJO);
                 bw.flush();
             }catch (IOException e){

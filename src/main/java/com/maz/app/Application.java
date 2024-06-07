@@ -1,9 +1,6 @@
 package com.maz.app;
 
-import com.maz.builder.Mapper;
-import com.maz.builder.POJO;
-import com.maz.builder.Query;
-import com.maz.builder.Table;
+import com.maz.builder.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +19,7 @@ public class Application {
         POJO.buildPOJOFromTables(tables);
         Query.buildQueryFromTables(tables);
         Mapper.buildMapperFromTables(tables);
+        XML.buildMapperXMLFromTables(tables);
         long timeSpend  = System.nanoTime() - time;
         logger.info("Application Finished in {} ns", timeSpend);
     }

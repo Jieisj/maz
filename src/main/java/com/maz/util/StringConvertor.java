@@ -6,9 +6,16 @@ public class StringConvertor {
             char c = Character.toUpperCase(s.charAt(0));
             return s.replace(s.charAt(0), c);
         }
-        return "";
+        return s;
     }
 
+    public static String lowerCaseFirstLetter(String s){
+        if (!s.isEmpty()){
+            char c = Character.toLowerCase(s.charAt(0));
+            return s.replace(s.charAt(0), c);
+        }
+        return s;
+    }
     public static String ignorePrefix(String str, String regex){
         String prefix = str.split(regex)[0];
         return str.replace(prefix, "");

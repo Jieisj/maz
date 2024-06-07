@@ -11,15 +11,27 @@ import java.util.Set;
 
 public class Query {
     private static final Logger logger = LoggerFactory.getLogger("builder.QueryBuilder");
+
+    static {
+        // create page query template
+        String outputPath = Property.getQueryPath();
+        String queryPackage = Property.getQueryPackage();
+        String packageInfo = Constructor.consPackage(queryPackage);
+        if (Property.getUseLombok()){
+            Template.buildFromTxt("PaginationQuery(lombok).txt", "PaginationQuery.java",outputPath, "java_template", packageInfo);
+        }else {
+            Template.buildFromTxt("PaginationQuery.txt", "PaginationQuery.java",outputPath, "java_template", packageInfo);
+        }
+    }
     private static void buildQuery(Table table){
         //properties
         String queryPath = Property.getQueryPath();
+        boolean useLombok = Property.getUseLombok();
         boolean isIgnoreComm = Property.getQueryIgnoreComment();
 
         File dirs = new File(queryPath);
         String queryParamName = table.getQueryParamName();
         File javaQuery = new File(queryPath + "/" + queryParamName + ".java");
-        System.out.println(queryParamName);
         logger.info("---------------------------------------------------------------");
 
         //create file
@@ -37,7 +49,9 @@ public class Query {
             try(OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(javaQuery));
                 BufferedWriter bw = new BufferedWriter(outputStreamWriter)) {
                 String importInfo = Constructor.consPoOrQueryImport(table);
-                String constructedQuery = Constructor.constructEntity(table, table.getQueryParamName(), Property.getQueryPackage(), importInfo, isIgnoreComm);
+                String extend = " extends PaginationQuery";
+                String constructedQuery = Constructor.constructEntity
+                        (table, table.getQueryParamName(), extend, Property.getQueryPackage(), importInfo, isIgnoreComm,useLombok);
                 bw.write(constructedQuery);
                 bw.flush();
             }catch (IOException e){

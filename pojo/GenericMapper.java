@@ -1,4 +1,4 @@
-package mapper;
+package pojo;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
 

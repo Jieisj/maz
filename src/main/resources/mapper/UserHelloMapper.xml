@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.UserHelloMapper">
+	<resultMap id="UserResultMap" type="pojo.UserHello">
+		<id column="id" property="id" />
+		<id column="name" property="name" />
+		<id column="age" property="age" />
+		<id column="email" property="email" />
+		<id column="address" property="address" />
+		<id column="zipcode" property="zipcode" />
+		<id column="weight" property="weight" />
+		<id column="have_house" property="haveHouse" />
+		<id column="date" property="date" />
+		<id column="time" property="time" />
+	</resultMap>
+
+	<select id="selectById" resultMap="UserResultMap"> 
+		Select * from tb_user where id = #{id} 
+	</select>
+
+	<select id="selectByEmail" resultMap="UserResultMap"> 
+		Select * from tb_user where email = #{email} 
+	</select>
+
+	<select id="selectByName" resultMap="UserResultMap"> 
+		Select * from tb_user where name = #{name} 
+	</select>
+
+	<select id="selectByAddress" resultMap="UserResultMap"> 
+		Select * from tb_user where address = #{address} 
+	</select>
+
+	<select id="selectByNameAndAgeAndAddress" resultMap="UserResultMap"> 
+		Select * from tb_user where name = #{name}, age = #{age}, address = #{address} 
+	</select>
+
+	<update id="updateById"> 
+		Update tb_user 
+		<include refid="non_auto_set_params"/> 
+		where id = #{id} 
+	</update>
+
+	<update id="updateByEmail"> 
+		Update tb_user 
+		<include refid="non_auto_set_params"/> 
+		where email = #{email} 
+	</update>
+
+	<update id="updateByName"> 
+		Update tb_user 
+		<include refid="non_auto_set_params"/> 
+		where name = #{name} 
+	</update>
+
+	<update id="updateByAddress"> 
+		Update tb_user 
+		<include refid="non_auto_set_params"/> 
+		where address = #{address} 
+	</update>
+
+	<update id="updateByNameAndAgeAndAddress"> 
+		Update tb_user 
+		<include refid="non_auto_set_params"/> 
+		where name = #{name}, age = #{age}, address = #{address} 
+	</update>
+
+	<delete id="deleteById"> 
+		Delete from tb_user where id = #{id}
+	</delete>
+
+	<delete id="deleteByEmail"> 
+		Delete from tb_user where email = #{email}
+	</delete>
+
+	<delete id="deleteByName"> 
+		Delete from tb_user where name = #{name}
+	</delete>
+
+	<delete id="deleteByAddress"> 
+		Delete from tb_user where address = #{address}
+	</delete>
+
+	<delete id="deleteByNameAndAgeAndAddress"> 
+		Delete from tb_user where name = #{name}, age = #{age}, address = #{address}
+	</delete>
+
+	<!--  Pojo Dynamic Update Sql Helper	-->
+
+	<sql id="non_auto_set_params"> 
+		<set>
+			<if test="user.name != null">name = #{user.name},</if>
+			<if test="user.age != null">age = #{user.age},</if>
+			<if test="user.email != null">email = #{user.email},</if>
+			<if test="user.address != null">address = #{user.address},</if>
+			<if test="user.zipcode != null">zipcode = #{user.zipcode},</if>
+			<if test="user.weight != null">weight = #{user.weight},</if>
+			<if test="user.haveHouse != null">have_house = #{user.haveHouse},</if>
+			<if test="user.date != null">date = #{user.date},</if>
+			<if test="user.time != null">time = #{user.time}</if>
+		</set> 
+	</sql>
+
+	<!--  Generic Sql Tag  -->
+
+	<select id="selectList" resultType="query.Userquery"> 
+		select * from tb_user 
+		<include refid="full_query_conditions"/> 
+	</select>
+
+	<insert id="insert" parameterType="pojo.UserHello">
+		insert into tb_user 
+		<include refid="insert_columns"/> 
+		values 
+		<include refid="insert_values"/> 
+	</insert>
+
+	<insert id="insertOrUpdate" parameterType="pojo.UserHello">
+		Insert into tb_user 
+		<include refid="inOrUp_columns"/> 
+		values 
+		<include refid="inOrUp_values"/> 
+		On Duplicate Key Update 
+		<include refid="inOrUp_update_values"/> 
+	</insert>
+
+	<insert id="insertList" parameterType="java.util.List"> 
+		insert into table tb_user 
+		<include refid="non_auto_columns"/> 
+		values 
+		<foreach item="User" collection="insertList" separator=","> 
+			<trim suffix=")" prefix="(" suffixOverrides=","> 
+				<if test="User.name != null">#{User.name},</if>
+				<if test="User.name == null">Null,</if>
+				<if test="User.age != null">#{User.age},</if>
+				<if test="User.age == null">Null,</if>
+				<if test="User.email != null">#{User.email},</if>
+				<if test="User.email == null">Null,</if>
+				<if test="User.address != null">#{User.address},</if>
+				<if test="User.address == null">Null,</if>
+				<if test="User.zipcode != null">#{User.zipcode},</if>
+				<if test="User.zipcode == null">Null,</if>
+				<if test="User.weight != null">#{User.weight},</if>
+				<if test="User.weight == null">Null,</if>
+				<if test="User.have_house != null">#{User.have_house},</if>
+				<if test="User.have_house == null">Null,</if>
+				<if test="User.date != null">#{User.date},</if>
+				<if test="User.date == null">Null,</if>
+				<if test="User.time != null">#{User.time},</if>
+				<if test="User.time == null">Null,</if> 
+			</trim> 
+		</foreach>
+	</insert>
+
+	<insert id="insertOrUpdateList" parameterType="java.util.List">
+		insert into tb_user 
+		<include refid="inOrUpList_columns"/> values 
+		<foreach item="User" collection="inOrUpList" open="(" close=")" separator=",">
+			#{User.id},#{User.name},#{User.age},#{User.email},#{User.address},#{User.zipcode},#{User.weight},#{User.have_house},#{User.date},#{User.time}
+		</foreach> 
+		as User 
+		on duplicate key update 
+		<include refid="inOrUpList_update_values"/>
+	</insert>
+
+	<select id="selectCount" parameterType="query.Userquery">
+		select count(*) from tb_user 
+		<where> 
+			<include refid="query_conditions"/> 
+		</where>
+	</select>
+
+	<!-- Generic Mapper Dynamic Sql Tag Helper	-->
+
+	<sql id="full_columns"> 
+		id,name,age,email,address,zipcode,weight,have_house,date,time 
+	</sql>
+
+	<sql id="non_auto_columns"> 
+		name,age,email,address,zipcode,weight,have_house,date,time 
+	</sql>
+
+	<sql id="query_conditions"> 
+		<if test="query.id != null">
+			and id = #{query.id}
+		</if>
+		<if test="query.name != null and query.name!=''">
+			and name = #{query.name}
+		</if>
+		<if test="query.age != null">
+			and age = #{query.age}
+		</if>
+		<if test="query.email != null and query.email!=''">
+			and email = #{query.email}
+		</if>
+		<if test="query.address != null and query.address!=''">
+			and address = #{query.address}
+		</if>
+		<if test="query.zipcode != null and query.zipcode!=''">
+			and zipcode = #{query.zipcode}
+		</if>
+		<if test="query.weight != null">
+			and weight = #{query.weight}
+		</if>
+		<if test="query.haveHouse != null and query.haveHouse!=''">
+			and have_house = #{query.haveHouse}
+		</if>
+		<if test="query.date != null">
+			and date = #{query.date}
+		</if>
+		<if test="query.time != null">
+			and time = #{query.time}
+		</if> 
+	</sql>
+
+</mapper>

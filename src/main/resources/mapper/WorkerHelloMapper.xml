@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.WorkerHelloMapper">
+	<resultMap id="WorkerResultMap" type="pojo.WorkerHello">
+		<id column="name" property="name" />
+		<id column="weight" property="weight" />
+		<id column="department" property="department" />
+		<id column="gender" property="gender" />
+	</resultMap>
+
+	<select id="selectByName" resultMap="WorkerResultMap"> 
+		Select * from tb_worker where name = #{name} 
+	</select>
+
+	<update id="updateByName"> 
+		Update tb_worker 
+		<include refid="non_auto_set_params"/> 
+		where name = #{name} 
+	</update>
+
+	<delete id="deleteByName"> 
+		Delete from tb_worker where name = #{name}
+	</delete>
+
+	<!--  Pojo Dynamic Update Sql Helper	-->
+
+	<sql id="non_auto_set_params"> 
+		<set>
+			<if test="worker.name != null">name = #{worker.name},</if>
+			<if test="worker.weight != null">weight = #{worker.weight},</if>
+			<if test="worker.department != null">department = #{worker.department},</if>
+			<if test="worker.gender != null">gender = #{worker.gender}</if>
+		</set> 
+	</sql>
+
+	<!--  Generic Sql Tag  -->
+
+	<select id="selectList" resultType="query.Workerquery"> 
+		select * from tb_worker 
+		<include refid="full_query_conditions"/> 
+	</select>
+
+	<insert id="insert" parameterType="pojo.WorkerHello">
+		insert into tb_worker 
+		<include refid="insert_columns"/> 
+		values 
+		<include refid="insert_values"/> 
+	</insert>
+
+	<insert id="insertOrUpdate" parameterType="pojo.WorkerHello">
+		Insert into tb_worker 
+		<include refid="inOrUp_columns"/> 
+		values 
+		<include refid="inOrUp_values"/> 
+		On Duplicate Key Update 
+		<include refid="inOrUp_update_values"/> 
+	</insert>
+
+	<insert id="insertList" parameterType="java.util.List"> 
+		insert into table tb_worker 
+		<include refid="non_auto_columns"/> 
+		values 
+		<foreach item="Worker" collection="insertList" separator=","> 
+			<trim suffix=")" prefix="(" suffixOverrides=","> 
+				<if test="Worker.name != null">#{Worker.name},</if>
+				<if test="Worker.name == null">Null,</if>
+				<if test="Worker.weight != null">#{Worker.weight},</if>
+				<if test="Worker.weight == null">Null,</if>
+				<if test="Worker.department != null">#{Worker.department},</if>
+				<if test="Worker.department == null">Null,</if>
+				<if test="Worker.gender != null">#{Worker.gender},</if>
+				<if test="Worker.gender == null">Null,</if> 
+			</trim> 
+		</foreach>
+	</insert>
+
+	<insert id="insertOrUpdateList" parameterType="java.util.List">
+		insert into tb_worker 
+		<include refid="inOrUpList_columns"/> values 
+		<foreach item="Worker" collection="inOrUpList" open="(" close=")" separator=",">
+			#{Worker.name},#{Worker.weight},#{Worker.department},#{Worker.gender}
+		</foreach> 
+		as Worker 
+		on duplicate key update 
+		<include refid="inOrUpList_update_values"/>
+	</insert>
+
+	<select id="selectCount" parameterType="query.Workerquery">
+		select count(*) from tb_worker 
+		<where> 
+			<include refid="query_conditions"/> 
+		</where>
+	</select>
+
+	<!-- Generic Mapper Dynamic Sql Tag Helper	-->
+
+	<sql id="full_columns"> 
+		name,weight,department,gender 
+	</sql>
+
+	<sql id="non_auto_columns"> 
+		name,weight,department,gender 
+	</sql>
+
+	<sql id="query_conditions"> 
+		<if test="query.name != null and query.name!=''">
+			and name = #{query.name}
+		</if>
+		<if test="query.weight != null">
+			and weight = #{query.weight}
+		</if>
+		<if test="query.department != null">
+			and department = #{query.department}
+		</if>
+		<if test="query.gender != null and query.gender!=''">
+			and gender = #{query.gender}
+		</if> 
+	</sql>
+
+</mapper>

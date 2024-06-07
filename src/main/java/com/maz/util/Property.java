@@ -115,7 +115,7 @@ public class Property {
     }
 
     public static String getMapperPath() {
-        String key = getPropertiesKey("map.mapper.path");
+        String key = getPropertiesKey("mapper.path");
         if (key == null || key.isEmpty()) {
             if (getBasePackage().isEmpty()) {
                 return getSourcePath() + "/" + packageToPath(getMapperPackage());
@@ -133,6 +133,18 @@ public class Property {
                 return getSourcePath() + "/" + packageToPath(getPoPackage());
             } else {
                 return getSourcePath() + "/" + packageToPath(getBasePackage()) + "/" + packageToPath(getPoPackage());
+            }
+        }
+        return key;
+    }
+
+    public static String getXMLPath() {
+        String key = getPropertiesKey("mapper.xml.path");
+        if (key == null || key.isEmpty()) {
+            if (getBasePackage().isEmpty()) {
+                return getResourcePath() + "/" + packageToPath(getMapperPackage());
+            } else {
+                return getResourcePath() + "/" + packageToPath(getBasePackage()) + "/" + packageToPath(getMapperPackage());
             }
         }
         return key;
@@ -164,7 +176,7 @@ public class Property {
     }
 
     public static String getMapperPackage() {
-        String key = getPropertiesKey("map.mapper.package");
+        String key = getPropertiesKey("mapper.package");
         if (key == null || key.isEmpty()) {
             return getBasePackage().isEmpty() ? "mapper" : getBasePackage();
         } else {
@@ -176,7 +188,7 @@ public class Property {
     public static boolean getUseLombok() {
         String key = getPropertiesKey("entity.useLombok");
         if (key == null) {
-            return false;
+            return true;
         }
         return Boolean.parseBoolean(key);
     }

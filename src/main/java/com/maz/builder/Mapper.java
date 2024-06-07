@@ -18,6 +18,17 @@ public class Mapper {
     public static Map<Table, List<String>> updateMethodNamesMap = new LinkedHashMap<>();
     public static Map<Table, List<String>> deleteMethodNamesMap = new LinkedHashMap<>();
 
+    static {
+        String outputPath = Property.getMapperPath();
+        String mapperPackage = Property.getMapperPackage();
+        String packageInfo = Constructor.consPackage(mapperPackage);
+        if (Property.getUseLombok()){
+            Template.buildFromTxt("GenericMapper.txt", "GenericMapper.java",outputPath, "java_template", packageInfo);
+        }else {
+            Template.buildFromTxt("GenericMapper.txt", "GenericMapper.java",outputPath,"java_template", packageInfo);
+        }
+    }
+
     private static void buildMapper(Table table) {
         //properties
         String mapperPath = Property.getMapperPath();
@@ -44,7 +55,6 @@ public class Mapper {
                 String mapper = consMapper(table, mapperContent);
                 bw.write(mapper);
                 bw.flush();
-                consGenericMapper();
             } catch (IOException e) {
                 logger.info("Mapper File Writer Failed");
             }
@@ -101,7 +111,7 @@ public class Mapper {
             String deleteMethodName = String.format("deleteBy%s", propertyLine);
 
             String select = String.format("\tT %s(%s);\n", selectMethodName, paramLine);
-            String update = String.format("\tInteger %s(%s);\n", updateMethodName, paramLine + String.format(", @Param(\"%s\") T t", table.getBeanName()));
+            String update = String.format("\tInteger %s(%s);\n", updateMethodName, paramLine + String.format(", @Param(\"%s\") T t", table.getPojoParamName()));
             String delete = String.format("\tInteger %s(%s);\n", deleteMethodName, paramLine);
             sb.append(select); // generate interface select method;
             sb.append(update); // generate interface update method;
@@ -121,7 +131,7 @@ public class Mapper {
     private static String consMapper(Table table, String content) {
         String packageInfo = Property.getMapperPackage();
         String importInfo = "import org.apache.ibatis.annotations.Param;\n";
-        String start = String.format("\npublic interface %s extends %s{\n%s", table.getBeanName() + "Mapper<T,P>", "GenericMapper.txt<T,P>", content);
+        String start = String.format("\npublic interface %s extends %s{\n%s", table.getBeanName() + "Mapper<T,P>", "GenericMapper<T,P>", content);
         String close = "}";
         if (packageInfo == null || packageInfo.isEmpty()) {
             return start + importInfo + close;
@@ -147,7 +157,7 @@ public class Mapper {
             String classPackage = Constructor.consPackage(Property.getMapperPackage()) + "\n";
             bufferedWriter.write(classPackage);
             bufferedWriter.newLine();
-            String lineContent = null;
+            String lineContent;
             while ((lineContent = bufferedReader.readLine()) != null) {
                 bufferedWriter.write(lineContent);
                 bufferedWriter.newLine();
