@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
  <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="mapper.UserHelloMapper">
+<mapper namespace="mapper.UserMapper">
 	<resultMap id="UserResultMap" type="pojo.UserHello">
 		<id column="id" property="id" />
 		<id column="name" property="name" />
@@ -171,44 +171,135 @@
 
 	<!-- Generic Mapper Dynamic Sql Tag Helper	-->
 
-	<sql id="full_columns"> 
-		id,name,age,email,address,zipcode,weight,have_house,date,time 
+	<sql id="non_auto_columns"> 
+		(name, age, email, address, zipcode, weight, have_house, date, time) 
 	</sql>
 
-	<sql id="non_auto_columns"> 
-		name,age,email,address,zipcode,weight,have_house,date,time 
+	<sql id="insert_columns"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="insert.name != null">name,</if>
+			<if test="insert.age != null">age,</if>
+			<if test="insert.email != null">email,</if>
+			<if test="insert.address != null">address,</if>
+			<if test="insert.zipcode != null">zipcode,</if>
+			<if test="insert.weight != null">weight,</if>
+			<if test="insert.have_house != null">have_house,</if>
+			<if test="insert.date != null">date,</if>
+			<if test="insert.time != null">time,</if>
+		</trim> 
+	</sql>
+
+	<sql id="insert_values"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="insert.name != null">#{insert.name},</if>
+			<if test="insert.age != null">#{insert.age},</if>
+			<if test="insert.email != null">#{insert.email},</if>
+			<if test="insert.address != null">#{insert.address},</if>
+			<if test="insert.zipcode != null">#{insert.zipcode},</if>
+			<if test="insert.weight != null">#{insert.weight},</if>
+			<if test="insert.have_house != null">#{insert.haveHouse},</if>
+			<if test="insert.date != null">#{insert.date},</if>
+			<if test="insert.time != null">#{insert.time},</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUp_columns"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="inOrUp.id != null">id,</if>
+			<if test="inOrUp.name != null">name,</if>
+			<if test="inOrUp.age != null">age,</if>
+			<if test="inOrUp.email != null">email,</if>
+			<if test="inOrUp.address != null">address,</if>
+			<if test="inOrUp.zipcode != null">zipcode,</if>
+			<if test="inOrUp.weight != null">weight,</if>
+			<if test="inOrUp.have_house != null">have_house,</if>
+			<if test="inOrUp.date != null">date,</if>
+			<if test="inOrUp.time != null">time,</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUp_values"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="inOrUp.id != null">#{inOrUp.id},</if>
+			<if test="inOrUp.name != null">#{inOrUp.name},</if>
+			<if test="inOrUp.age != null">#{inOrUp.age},</if>
+			<if test="inOrUp.email != null">#{inOrUp.email},</if>
+			<if test="inOrUp.address != null">#{inOrUp.address},</if>
+			<if test="inOrUp.zipcode != null">#{inOrUp.zipcode},</if>
+			<if test="inOrUp.weight != null">#{inOrUp.weight},</if>
+			<if test="inOrUp.have_house != null">#{inOrUp.haveHouse},</if>
+			<if test="inOrUp.date != null">#{inOrUp.date},</if>
+			<if test="inOrUp.time != null">#{inOrUp.time},</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUp_update_values"> 
+		<trim suffixOverrides=",">
+			<if test="inOrUp.id != null">id = #{inOrUp.id},</if>
+			<if test="inOrUp.name != null">name = #{inOrUp.name},</if>
+			<if test="inOrUp.age != null">age = #{inOrUp.age},</if>
+			<if test="inOrUp.email != null">email = #{inOrUp.email},</if>
+			<if test="inOrUp.address != null">address = #{inOrUp.address},</if>
+			<if test="inOrUp.zipcode != null">zipcode = #{inOrUp.zipcode},</if>
+			<if test="inOrUp.weight != null">weight = #{inOrUp.weight},</if>
+			<if test="inOrUp.have_house != null">have_house = #{inOrUp.haveHouse},</if>
+			<if test="inOrUp.date != null">date = #{inOrUp.date},</if>
+			<if test="inOrUp.time != null">time = #{inOrUp.time},</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUpList_columns"> 
+		id, name, age, email, address, zipcode, weight, have_house, date, time 
+	</sql>
+
+	<sql id="inOrUpList_update_values"> 
+		id = #{User.id}, name = #{User.name}, age = #{User.age}, email = #{User.email}, address = #{User.address}, zipcode = #{User.zipcode}, weight = #{User.weight}, have_house = #{User.have_house}, date = #{User.date}, time = #{User.time} 
 	</sql>
 
 	<sql id="query_conditions"> 
-		<if test="query.id != null">
-			and id = #{query.id}
+		<trim prefixOverrides="and">
+			<if test="query.id != null">
+				and id = #{query.id}
+			</if>
+			<if test="query.name != null and query.name!=''">
+				and name = #{query.name}
+			</if>
+			<if test="query.age != null">
+				and age = #{query.age}
+			</if>
+			<if test="query.email != null and query.email!=''">
+				and email = #{query.email}
+			</if>
+			<if test="query.address != null and query.address!=''">
+				and address = #{query.address}
+			</if>
+			<if test="query.zipcode != null and query.zipcode!=''">
+				and zipcode = #{query.zipcode}
+			</if>
+			<if test="query.weight != null">
+				and weight = #{query.weight}
+			</if>
+			<if test="query.haveHouse != null and query.haveHouse!=''">
+				and have_house = #{query.haveHouse}
+			</if>
+			<if test="query.date != null">
+				and date = #{query.date}
+			</if>
+			<if test="query.time != null">
+				and time = #{query.time}
+			</if>
+		</trim> 
+	</sql>
+
+	<sql id="full_query_conditions"> 
+		<where>
+			<include refid="query_conditions"/>
+		</where>
+		<if test="query.orderBy != null and query.orderBy !=''">
+			Order by ${query.orderBy} ${query.order}
 		</if>
-		<if test="query.name != null and query.name!=''">
-			and name = #{query.name}
-		</if>
-		<if test="query.age != null">
-			and age = #{query.age}
-		</if>
-		<if test="query.email != null and query.email!=''">
-			and email = #{query.email}
-		</if>
-		<if test="query.address != null and query.address!=''">
-			and address = #{query.address}
-		</if>
-		<if test="query.zipcode != null and query.zipcode!=''">
-			and zipcode = #{query.zipcode}
-		</if>
-		<if test="query.weight != null">
-			and weight = #{query.weight}
-		</if>
-		<if test="query.haveHouse != null and query.haveHouse!=''">
-			and have_house = #{query.haveHouse}
-		</if>
-		<if test="query.date != null">
-			and date = #{query.date}
-		</if>
-		<if test="query.time != null">
-			and time = #{query.time}
+		<if test="query.numPerPage != null">
+			Limit #{query.offSet},#{query.numPerPage}
 		</if> 
 	</sql>
 

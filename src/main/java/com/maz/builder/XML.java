@@ -25,7 +25,7 @@ public class XML {
     private static final String REF_FULL_COLUMNS = "full_columns";
     private static final String REF_NON_AUTO_COLUMNS = "non_auto_columns";
     private static final String REF_QUERY_CONDITIONS = "query_conditions";
-    private static final String REF_QUERY_FULL_CONDITIONS = "full_query_conditions";
+    private static final String REF_FULL_QUERY_CONDITIONS = "full_query_conditions";
     private static final String REF_INSERT_COLUMNS = "insert_columns";
     private static final String REF_INSERT_VALUES = "insert_values";
     private static final String REF_IN_OR_UP_COLUMNS = "inOrUp_columns";
@@ -40,29 +40,28 @@ public class XML {
         System.out.println(mapperXMLPath);
         File mapperXMLFile = new File(mapperXMLPath + "/" + table.getPojoParamName() + "Mapper.xml");
         System.out.println(mapperXMLFile);
-        if (mapperXMLDir.mkdirs()){
+        if (mapperXMLDir.mkdirs()) {
             logger.info("Mapper XML Director Created");
-        }else {
+        } else {
             logger.info("Mapper XML Director Have Existed");
         }
-        try{
-            if (mapperXMLFile.createNewFile()){
+        try {
+            if (mapperXMLFile.createNewFile()) {
                 logger.info("Mapper XML File Created");
-            }else {
+            } else {
                 logger.info("Mapper XML File Have Existed");
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             logger.info("Mapper XML File Creation Failed");
         }
         try (OutputStreamWriter ow = new OutputStreamWriter(Files.newOutputStream(mapperXMLFile.toPath()), StandardCharsets.UTF_8);
-             BufferedWriter bw = new BufferedWriter(ow))
-        {
+             BufferedWriter bw = new BufferedWriter(ow)) {
             StringBuilder contentSb = new StringBuilder();
             String resultMapID = String.format("%sResultMap", table.getBeanName());
             String resultType = Property.getPoPackage() + "." + table.getPojoParamName();
             String content = buildMapperContent(table, resultMapID, resultType);
             contentSb.append(content);
-            String fullPackage = String.format("%s.%s", Property.getMapperPackage(), table.getPojoParamName() + "Mapper");
+            String fullPackage = String.format("%s.%s", Property.getMapperPackage(), table.getBeanName() + "Mapper");
             String template = buildMapperTemplate(fullPackage, contentSb);
             bw.write(template);
             bw.flush();
@@ -120,38 +119,52 @@ public class XML {
 
         tagSb.append("\n\n\t<!-- Generic Mapper Dynamic Sql Tag Helper\t-->\n");
 
-        //generic dynamic sql helper
-        String fullColumnTag = createSqlTag(REF_FULL_COLUMNS, buildFullColumnTag(table));
-        tagSb.append(fullColumnTag);
+        //Generic dynamic sql helper
         String nonAutoColumnTag = createSqlTag(REF_NON_AUTO_COLUMNS, buildNonAutoColumnTag(table));
         tagSb.append(nonAutoColumnTag);
-        String queryConditionsTag = createSqlTag(REF_QUERY_CONDITIONS, buildQueryConditions(table));
-        tagSb.append(queryConditionsTag);
+        String insertColumns = createSqlTag(REF_INSERT_COLUMNS, buildInsertColumns(table));
+        tagSb.append(insertColumns);
+        String insertValues = createSqlTag(REF_INSERT_VALUES, buildInsertValues(table));
+        tagSb.append(insertValues);
+        String inOrUpColumns = createSqlTag(REF_IN_OR_UP_COLUMNS, buildInOrUpColumns(table));
+        tagSb.append(inOrUpColumns);
+        String inOrUpValues = createSqlTag(REF_IN_OR_UP_VALUES, buildInOrUpValues(table));
+        tagSb.append(inOrUpValues);
+        String inOrUpUpdateValues = createSqlTag(REF_IN_OR_UP_UPDATE_VALUES, buildInOrUpUpdateValues(table));
+        tagSb.append(inOrUpUpdateValues);
+        String inOrUpListColumns = createSqlTag(REF_IN_OR_UP_LIST_COLUMNS, buildInOrUpListColumns(table));
+        tagSb.append(inOrUpListColumns);
+        String inOrUpListUpdateValues = createSqlTag(REF_IN_OR_UP_LIST_UPDATE_VALUES, buildInOrUpListUpdateValues(table));
+        tagSb.append(inOrUpListUpdateValues);
+        String queryConditions = createSqlTag(REF_QUERY_CONDITIONS, buildQueryConditions(table));
+        tagSb.append(queryConditions);
+        String fullColumn = createSqlTag(REF_FULL_QUERY_CONDITIONS, buildFullQueryConditions());
+        tagSb.append(fullColumn);
 
         return resultMap + tagSb;
     }
 
-    private static String genSelMethod(Table table, String resultMapID){
+    private static String genSelMethod(Table table, String resultMapID) {
         List<String> selectMethodList = Mapper.selectMethodNamesMap.get(table);
         StringBuilder selMethodSb = new StringBuilder();
         String selectMethod = "";
         for (String methodName : selectMethodList) {
-            if (methodName.contains("And")){
+            if (methodName.contains("And")) {
                 String[] properties = methodName.substring(8).split("And");
                 StringBuilder paramsSb = new StringBuilder();
                 int index = 0;
-                for(String property : properties){
+                for (String property : properties) {
                     index++;
                     property = StringConvertor.lowerCaseFirstLetter(property);
                     String params = genSelectSqlParam(table, property);
                     paramsSb.append(params);
-                    if(index < properties.length){
+                    if (index < properties.length) {
                         paramsSb.append(", ");
                     }
                 }
                 String selectSql = genSelectSql(table, paramsSb.toString());
                 selectMethod = selectTag(methodName, resultMapID, selectSql);
-            }else {
+            } else {
                 String property = StringConvertor.lowerCaseFirstLetter(methodName.substring(8)); //"selectBy" the end index is 7
                 String params = genSelectSqlParam(table, property);
                 String selectSql = genSelectSql(table, params);
@@ -161,15 +174,16 @@ public class XML {
         }
         return selMethodSb.toString();
     }
-    private static String genUpdateMethod(Table table){
+
+    private static String genUpdateMethod(Table table) {
         List<String> updateMethodList = Mapper.updateMethodNamesMap.get(table);
         StringBuilder updateMethodSb = new StringBuilder();
         String updateMethod = "";
         for (String updateMethodName : updateMethodList) {
-            if (updateMethodName.contains("And")){
+            if (updateMethodName.contains("And")) {
                 String[] properties = updateMethodName.substring(8).split("And");
                 StringBuilder paramsSb = new StringBuilder();
-                for(String property : properties){
+                for (String property : properties) {
                     property = StringConvertor.lowerCaseFirstLetter(property);
                     String params = genSelectSqlParam(table, property);
                     paramsSb.append(params);
@@ -178,7 +192,7 @@ public class XML {
                 String params = paramsSb.substring(0, paramsSb.lastIndexOf(","));
                 String updateSql = genUpdateSql(table, genUpdateSetParamRef(), params);
                 updateMethod = updateTag(updateMethodName, updateSql);
-            }else {
+            } else {
                 String property = StringConvertor.lowerCaseFirstLetter(updateMethodName.substring(8)); //"update" the end index is 7
                 String params = genUpdateParam(table, property);
                 String updateSql = genUpdateSql(table, genUpdateSetParamRef(), params);
@@ -188,27 +202,28 @@ public class XML {
         }
         return updateMethodSb.toString();
     }
-    private static String genDelMethod(Table table){
+
+    private static String genDelMethod(Table table) {
         List<String> deleteMethodList = Mapper.deleteMethodNamesMap.get(table);
         StringBuilder delMethodSb = new StringBuilder();
         String deleteMethod = "";
         for (String deleteMethodName : deleteMethodList) {
-            if (deleteMethodName.contains("And")){
+            if (deleteMethodName.contains("And")) {
                 String[] properties = deleteMethodName.substring(8).split("And");
                 StringBuilder paramsSb = new StringBuilder();
                 int index = 0;
-                for(String property : properties){
+                for (String property : properties) {
                     index++;
                     property = StringConvertor.lowerCaseFirstLetter(property);
                     String params = genDeleteSqlParam(table, property);
                     paramsSb.append(params);
-                    if(index < properties.length){
+                    if (index < properties.length) {
                         paramsSb.append(", ");
                     }
                 }
                 String deleteSql = genDeleteSql(table, paramsSb.toString());
                 deleteMethod = deleteTag(deleteMethodName, deleteSql);
-            }else {
+            } else {
                 String property = StringConvertor.lowerCaseFirstLetter(deleteMethodName.substring(8)); //"selectBy" the end index is 7
                 String params = genDeleteSqlParam(table, property);
                 String deleteSql = genDeleteSql(table, params);
@@ -219,7 +234,8 @@ public class XML {
         }
         return delMethodSb.toString();
     }
-    private static String resultMapTag(Table table, String resultId, String resultType){
+
+    private static String resultMapTag(Table table, String resultId, String resultType) {
         String start = String.format("\t<resultMap id=\"%s\" type=\"%s\">", resultId, resultType);
         StringBuilder resultSb = new StringBuilder();
         for (Field field : table.getFields()) {
@@ -245,6 +261,7 @@ public class XML {
     private static String genSelectSql(Table table, String params) {
         return String.format("\n\t\tSelect * from %s where %s", table.getName(), params);
     }
+
     private static String genSelectSqlParam(Table table, String property) {
         String fieldName = null;
         for (Field f : table.getFields()) {
@@ -253,35 +270,38 @@ public class XML {
                 break;
             }
         }
-        return  String.format("%s = #{%s}", fieldName, property);
+        return String.format("%s = #{%s}", fieldName, property);
     }
 
     private static String genUpdateSql(Table table, String setParam, String param) {
         return String.format("\n\t\tUpdate %s %s \n\t\twhere %s", table.getName(), setParam, param);
     }
-    private static String genUpdateParam(Table table, String property){
+
+    private static String genUpdateParam(Table table, String property) {
         String fieldName = null;
         List<Field> fields = table.getFields();
-        for (Field f : fields){
+        for (Field f : fields) {
             if (f.getPropertyName().equals(property)) {
                 fieldName = f.getName();
             }
         }
         return String.format("%s = #{%s}", fieldName, property);
     }
-    private static String genUpdateSetParamRef(){
+
+    private static String genUpdateSetParamRef() {
         return createIncludeTag(XML.REF_NON_AUTO_SET_PARAMS);
     }
-    private static String genUpdateSetParam(Table table){
+
+    private static String genUpdateSetParam(Table table) {
         StringBuilder params = new StringBuilder();
         List<Field> fields = table.getFields();
         int index = 0;
-        for (Field f : fields){
+        for (Field f : fields) {
             index++;
-            if (!f.isAutoIncrement()){
+            if (!f.isAutoIncrement()) {
                 String propertyName = f.getPropertyName();
                 params.append(String.format("%s = #{%s}", f.getName(), propertyName));
-                if (!(index > fields.size())){
+                if (!(index > fields.size())) {
                     params.append(", ");
                 }
             }
@@ -292,7 +312,8 @@ public class XML {
     private static String genDeleteSql(Table table, String params) {
         return String.format("\n\t\tDelete from %s where %s", table.getName(), params);
     }
-    private static String genDeleteSqlParam(Table table, String property){
+
+    private static String genDeleteSqlParam(Table table, String property) {
         String fieldName = null;
         for (Field f : table.getFields()) {
             if (f.getPropertyName().equals(property)) {
@@ -303,76 +324,81 @@ public class XML {
         return String.format("%s = #{%s}", fieldName, property);
     }
 
-    private static String createIncludeTag(String refId){
-        return  String.format("\n\t\t<include refid=\"%s\"/>", refId);
+    private static String createIncludeTag(String refId) {
+        return String.format("\n\t\t<include refid=\"%s\"/>", refId);
     }
-    private static String createSqlTag(String id, String content){
+
+    private static String createSqlTag(String id, String content) {
         return String.format("\n\t<sql id=\"%s\"> %s \n\t</sql>\n", id, content);
     }
 
-    private static String buildFullColumnTag(Table table){
+    private static String buildFullQueryConditions() {
         StringBuilder sb = new StringBuilder();
-        for (Field field: table.getFields()) {
-            sb.append(field.getName()).append(",");
-        }
-        return "\n\t\t" + sb.substring(0, sb.lastIndexOf(","));
+        String whereTag = String.format("\n\t\t<where>\n\t\t\t<include refid=\"%s\"/>\n\t\t</where>", REF_QUERY_CONDITIONS);
+        String ifTag = String.format("\n\t\t<if test=\"query.orderBy != null and query.orderBy !=''\">%s\n\t\t</if>",
+                "\n\t\t\tOrder by ${query.orderBy} ${query.order}"
+        );
+        String ifTag2 = String.format("\n\t\t<if test=\"query.numPerPage != null\">%s\n\t\t</if>",
+                "\n\t\t\tLimit #{query.offSet},#{query.numPerPage}");
+        return String.format("%s%s%s", whereTag, ifTag, ifTag2);
     }
 
-    private static String buildNonAutoColumnTag(Table table){
+    private static String buildNonAutoColumnTag(Table table) {
         StringBuilder sb = new StringBuilder();
-        for (Field field: table.getFields()) {
-            if (!field.isAutoIncrement()){
-                sb.append(field.getName()).append(",");
+        for (Field field : table.getFields()) {
+            if (!field.isAutoIncrement()) {
+                sb.append(field.getName()).append(", ");
             }
         }
-        return "\n\t\t" + sb.substring(0, sb.lastIndexOf(","));
+        return "\n\t\t(" + sb.substring(0, sb.lastIndexOf(",")) + ")";
     }
-    private static String buildNonAutoSetParamsTag(Table table){
+
+    private static String buildNonAutoSetParamsTag(Table table) {
         StringBuilder beanSetParamsBuilder = new StringBuilder();
         String beanName = table.getBeanName();
         int size = table.getFields().size() - 1;
         int index = 0;
-        for (Field field: table.getFields()) {
-            if (!field.isAutoIncrement()){
+        for (Field field : table.getFields()) {
+            if (!field.isAutoIncrement()) {
                 String param = StringConvertor.lowerCaseFirstLetter(beanName);
                 String tagContent = String.format("%s = #{%s}", field.getName(), param + "." + field.getPropertyName());
                 String ifTag = "";
-                if (index == size){
-                    ifTag = String.format("\n\t\t\t<if test=\"%s.%s != null\">%s</if>", param, field.getPropertyName(),tagContent);
-                }else {
-                    ifTag = String.format("\n\t\t\t<if test=\"%s.%s != null\">%s,</if>", param, field.getPropertyName(),tagContent);
+                if (index == size) {
+                    ifTag = String.format("\n\t\t\t<if test=\"%s.%s != null\">%s</if>", param, field.getPropertyName(), tagContent);
+                } else {
+                    ifTag = String.format("\n\t\t\t<if test=\"%s.%s != null\">%s,</if>", param, field.getPropertyName(), tagContent);
                 }
                 beanSetParamsBuilder.append(ifTag);
             }
             index++;
         }
-        return String.format("\n\t\t<set>%s\n\t\t</set>",beanSetParamsBuilder);
+        return String.format("\n\t\t<set>%s\n\t\t</set>", beanSetParamsBuilder);
     }
 
-    private static String buildQueryConditions(Table table){
+    private static String buildQueryConditions(Table table) {
         StringBuilder baseConditionBuilder = new StringBuilder();
-        for (Field field: table.getFields()) {
+        for (Field field : table.getFields()) {
             String query = "";
-            if (ArrayUtils.contains(TypeHandler.String, field.getSqlType())){
+            if (ArrayUtils.contains(TypeHandler.String, field.getSqlType())) {
                 query = " and query." + field.getPropertyName() + "!=''";
             }
-            String ifContent = String.format("\n\t\t\tand %s = #{query.%s}", field.getName(),field.getPropertyName());
-            String ifSql = String.format("\n\t\t<if test=\"query.%s != null%s\">%s\n\t\t</if>", field.getPropertyName(), query, ifContent);
+            String ifContent = String.format("\n\t\t\t\tand %s = #{query.%s}", field.getName(), field.getPropertyName());
+            String ifSql = String.format("\n\t\t\t<if test=\"query.%s != null%s\">%s\n\t\t\t</if>", field.getPropertyName(), query, ifContent);
             baseConditionBuilder.append(ifSql);
         }
-        return baseConditionBuilder.toString();
+        return String.format("\n\t\t<trim prefixOverrides=\"and\">%s\n\t\t</trim>",baseConditionBuilder);
     }
 
-    private static String genericSelectList(Table table){
+    private static String genericSelectList(Table table) {
         String queryPackage = Property.getQueryPackage();
         String queryParamName = table.getQueryParamName();
         String fullQualifiedName = queryPackage + "." + queryParamName;
-        String includeTag = createIncludeTag(REF_QUERY_FULL_CONDITIONS);
+        String includeTag = createIncludeTag(REF_FULL_QUERY_CONDITIONS);
         String sql = String.format("\n\t\tselect * from %s %s", table.getName(), includeTag);
         return String.format("\n\n\t<select id=\"selectList\" resultType=\"%s\"> %s \n\t</select>", fullQualifiedName, sql);
     }
 
-    private static String genericInsert(Table table){
+    private static String genericInsert(Table table) {
         String poPackage = Property.getPoPackage();
         String pojoParamName = table.getPojoParamName();
         String fullQualifiedName = poPackage + "." + pojoParamName;
@@ -384,7 +410,7 @@ public class XML {
                         fullQualifiedName, tableName, includeTag1, includeTag2);
     }
 
-    private static String genericInsertOrUpdate(Table table){
+    private static String genericInsertOrUpdate(Table table) {
         String poPackage = Property.getPoPackage();
         String pojoParamName = table.getPojoParamName();
         String fullQualifiedName = poPackage + "." + pojoParamName;
@@ -397,13 +423,13 @@ public class XML {
                         fullQualifiedName, tableName, includeTag1, includeTag2, includeTag3);
     }
 
-    private static String genericInsertList(Table table){
+    private static String genericInsertList(Table table) {
         String includeTag1 = createIncludeTag(REF_NON_AUTO_COLUMNS);
         StringBuilder ifTagSb = new StringBuilder();
         List<Field> fields = table.getFields();
         String beanName = table.getBeanName();
-        for (Field field : fields){
-            if (!field.isAutoIncrement()){
+        for (Field field : fields) {
+            if (!field.isAutoIncrement()) {
                 String param = beanName + "." + field.getName();
                 ifTagSb.append(String.format("\n\t\t\t\t<if test=\"%s != null\">#{%s},</if>", param, param));
                 ifTagSb.append(String.format("\n\t\t\t\t<if test=\"%s == null\">Null,</if>", param));
@@ -415,33 +441,105 @@ public class XML {
         return String.format
                 ("\n\n\t<insert id=\"insertList\" parameterType=\"java.util.List\"> \n\t\tinsert into table %s %s \n\t\tvalues %s\n\t</insert>",
                         table.getName(), includeTag1, forEachTag
-                        );
+                );
     }
 
-    private static String genericInsertOrUpdateList(Table table){
+    private static String genericInsertOrUpdateList(Table table) {
         String beanName = table.getBeanName();
         StringBuilder forEachParamsSb = new StringBuilder();
         List<Field> fields = table.getFields();
-        for(Field field : fields){
-            forEachParamsSb.append(String.format("#{%s},",beanName + "." + field.getName()));
+        for (Field field : fields) {
+            forEachParamsSb.append(String.format("#{%s},", beanName + "." + field.getName()));
         }
         String forEachParams = "\n\t\t\t" + forEachParamsSb.substring(0, forEachParamsSb.lastIndexOf(","));
-        String forEach = String.format("\n\t\t<foreach item=\"%s\" collection=\"inOrUpList\" open=\"(\" close=\")\" separator=\",\">%s\n\t\t</foreach>",beanName, forEachParams);
+        String forEach = String.format("\n\t\t<foreach item=\"%s\" collection=\"inOrUpList\" open=\"(\" close=\")\" separator=\",\">%s\n\t\t</foreach>", beanName, forEachParams);
         String includeTag1 = createIncludeTag(REF_IN_OR_UP_LIST_COLUMNS);
         String includeTag2 = createIncludeTag(REF_IN_OR_UP_LIST_UPDATE_VALUES);
         return String.format
                 ("\n\n\t<insert id=\"insertOrUpdateList\" parameterType=\"java.util.List\">\n\t\tinsert into %s %s values %s \n\t\tas %s \n\t\ton duplicate key update %s\n\t</insert>",
-                       table.getName(), includeTag1, forEach, beanName, includeTag2);
+                        table.getName(), includeTag1, forEach, beanName, includeTag2);
     }
 
-    private static String genericSelectCount(Table table){
+    private static String genericSelectCount(Table table) {
         String tableName = table.getName();
         String queryPackage = Property.getQueryPackage();
         String queryParamName = table.getQueryParamName();
         String includeTag = String.format("\n\t\t\t<include refid=\"%s\"/>", REF_QUERY_CONDITIONS);
         String fullQualifiedName = queryPackage + "." + queryParamName;
-        String whereTag = String.format("\n\t\t<where> %s \n\t\t</where>",  includeTag);
+        String whereTag = String.format("\n\t\t<where> %s \n\t\t</where>", includeTag);
         return String.format("\n\n\t<select id=\"selectCount\" parameterType=\"%s\">\n\t\tselect count(*) from %s %s\n\t</select>",
                 fullQualifiedName, tableName, whereTag);
+    }
+
+    private static String buildInsertColumns(Table table) {
+        StringBuilder sb = new StringBuilder();
+        List<Field> fields = table.getFields();
+        for (Field field : fields) {
+            if (!field.isAutoIncrement()) {
+                sb.append(String.format("\n\t\t\t<if test=\"%s != null\">%s</if>", "insert." + field.getName(), field.getName() + ","));
+            }
+        }
+        String ifTags = sb.toString();
+        return String.format("\n\t\t<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">%s\n\t\t</trim>", ifTags);
+    }
+
+    private static String buildInsertValues(Table table) {
+        StringBuilder sb = new StringBuilder();
+        List<Field> fields = table.getFields();
+        for (Field field : fields) {
+            if (!field.isAutoIncrement()) {
+                sb.append(String.format("\n\t\t\t<if test=\"%s != null\">%s</if>", "insert." + field.getName(), "#{insert." + field.getPropertyName() + "},"));
+            }
+        }
+        String ifTags = sb.toString();
+        return String.format("\n\t\t<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">%s\n\t\t</trim>", ifTags);
+    }
+
+    private static String buildInOrUpColumns(Table table) {
+        StringBuilder sb = new StringBuilder();
+        List<Field> fields = table.getFields();
+        for (Field field : fields) {
+            sb.append(String.format("\n\t\t\t<if test=\"%s != null\">%s</if>", "inOrUp." + field.getName(), field.getName() + ","));
+        }
+        String ifTags = sb.toString();
+        return String.format("\n\t\t<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">%s\n\t\t</trim>", ifTags);
+    }
+
+    private static String buildInOrUpValues(Table table) {
+        StringBuilder sb = new StringBuilder();
+        List<Field> fields = table.getFields();
+        for (Field field : fields) {
+            sb.append(String.format("\n\t\t\t<if test=\"%s != null\">%s</if>", "inOrUp." + field.getName(), "#{inOrUp." + field.getPropertyName() + "},"));
+        }
+        String ifTags = sb.toString();
+        return String.format("\n\t\t<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">%s\n\t\t</trim>", ifTags);
+    }
+
+    private static String buildInOrUpUpdateValues(Table table) {
+        StringBuilder sb = new StringBuilder();
+        List<Field> fields = table.getFields();
+        for (Field field : fields) {
+            sb.append(String.format("\n\t\t\t<if test=\"%s != null\">%s</if>", "inOrUp." + field.getName(), field.getName() + " = #{inOrUp." + field.getPropertyName() + "},"));
+        }
+        String ifTags = sb.toString();
+        return String.format("\n\t\t<trim suffixOverrides=\",\">%s\n\t\t</trim>", ifTags);
+    }
+
+    private static String buildInOrUpListColumns(Table table) {
+        StringBuilder sb = new StringBuilder();
+        List<Field> fields = table.getFields();
+        for (Field field : fields) {
+            sb.append(field.getName()).append(", ");
+        }
+        return "\n\t\t" + sb.substring(0, sb.lastIndexOf(","));
+    }
+
+    private static String buildInOrUpListUpdateValues(Table table) {
+        StringBuilder sb = new StringBuilder();
+        List<Field> fields = table.getFields();
+        for (Field field : fields) {
+            sb.append(field.getName()).append(" = #{").append(table.getBeanName()).append(".").append(field.getName()).append("}, ");
+        }
+        return "\n\t\t" + sb.substring(0, sb.lastIndexOf(","));
     }
 }

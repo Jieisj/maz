@@ -115,23 +115,79 @@
 
 	<!-- Generic Mapper Dynamic Sql Tag Helper	-->
 
-	<sql id="full_columns"> 
-		depId,depName,depPeopNum 
+	<sql id="non_auto_columns"> 
+		(depName, depPeopNum) 
 	</sql>
 
-	<sql id="non_auto_columns"> 
-		depName,depPeopNum 
+	<sql id="insert_columns"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="insert.depName != null">depName,</if>
+			<if test="insert.depPeopNum != null">depPeopNum,</if>
+		</trim> 
+	</sql>
+
+	<sql id="insert_values"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="insert.depName != null">#{insert.depName},</if>
+			<if test="insert.depPeopNum != null">#{insert.depPeopNum},</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUp_columns"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="inOrUp.depId != null">depId,</if>
+			<if test="inOrUp.depName != null">depName,</if>
+			<if test="inOrUp.depPeopNum != null">depPeopNum,</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUp_values"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="inOrUp.depId != null">#{inOrUp.depId},</if>
+			<if test="inOrUp.depName != null">#{inOrUp.depName},</if>
+			<if test="inOrUp.depPeopNum != null">#{inOrUp.depPeopNum},</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUp_update_values"> 
+		<trim suffixOverrides=",">
+			<if test="inOrUp.depId != null">depId = #{inOrUp.depId},</if>
+			<if test="inOrUp.depName != null">depName = #{inOrUp.depName},</if>
+			<if test="inOrUp.depPeopNum != null">depPeopNum = #{inOrUp.depPeopNum},</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUpList_columns"> 
+		depId, depName, depPeopNum 
+	</sql>
+
+	<sql id="inOrUpList_update_values"> 
+		depId = #{Dep.depId}, depName = #{Dep.depName}, depPeopNum = #{Dep.depPeopNum} 
 	</sql>
 
 	<sql id="query_conditions"> 
-		<if test="query.depId != null">
-			and depId = #{query.depId}
+		<trim prefixOverrides="and">
+			<if test="query.depId != null">
+				and depId = #{query.depId}
+			</if>
+			<if test="query.depName != null and query.depName!=''">
+				and depName = #{query.depName}
+			</if>
+			<if test="query.depPeopNum != null">
+				and depPeopNum = #{query.depPeopNum}
+			</if>
+		</trim> 
+	</sql>
+
+	<sql id="full_query_conditions"> 
+		<where>
+			<include refid="query_conditions"/>
+		</where>
+		<if test="query.orderBy != null and query.orderBy !=''">
+			Order by ${query.orderBy} ${query.order}
 		</if>
-		<if test="query.depName != null and query.depName!=''">
-			and depName = #{query.depName}
-		</if>
-		<if test="query.depPeopNum != null">
-			and depPeopNum = #{query.depPeopNum}
+		<if test="query.numPerPage != null">
+			Limit #{query.offSet},#{query.numPerPage}
 		</if> 
 	</sql>
 

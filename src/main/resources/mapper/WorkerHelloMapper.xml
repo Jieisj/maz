@@ -94,26 +94,89 @@
 
 	<!-- Generic Mapper Dynamic Sql Tag Helper	-->
 
-	<sql id="full_columns"> 
-		name,weight,department,gender 
+	<sql id="non_auto_columns"> 
+		(name, weight, department, gender) 
 	</sql>
 
-	<sql id="non_auto_columns"> 
-		name,weight,department,gender 
+	<sql id="insert_columns"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="insert.name != null">name,</if>
+			<if test="insert.weight != null">weight,</if>
+			<if test="insert.department != null">department,</if>
+			<if test="insert.gender != null">gender,</if>
+		</trim> 
+	</sql>
+
+	<sql id="insert_values"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="insert.name != null">#{insert.name},</if>
+			<if test="insert.weight != null">#{insert.weight},</if>
+			<if test="insert.department != null">#{insert.department},</if>
+			<if test="insert.gender != null">#{insert.gender},</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUp_columns"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="inOrUp.name != null">name,</if>
+			<if test="inOrUp.weight != null">weight,</if>
+			<if test="inOrUp.department != null">department,</if>
+			<if test="inOrUp.gender != null">gender,</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUp_values"> 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="inOrUp.name != null">#{inOrUp.name},</if>
+			<if test="inOrUp.weight != null">#{inOrUp.weight},</if>
+			<if test="inOrUp.department != null">#{inOrUp.department},</if>
+			<if test="inOrUp.gender != null">#{inOrUp.gender},</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUp_update_values"> 
+		<trim suffixOverrides=",">
+			<if test="inOrUp.name != null">name = #{inOrUp.name},</if>
+			<if test="inOrUp.weight != null">weight = #{inOrUp.weight},</if>
+			<if test="inOrUp.department != null">department = #{inOrUp.department},</if>
+			<if test="inOrUp.gender != null">gender = #{inOrUp.gender},</if>
+		</trim> 
+	</sql>
+
+	<sql id="inOrUpList_columns"> 
+		name, weight, department, gender 
+	</sql>
+
+	<sql id="inOrUpList_update_values"> 
+		name = #{Worker.name}, weight = #{Worker.weight}, department = #{Worker.department}, gender = #{Worker.gender} 
 	</sql>
 
 	<sql id="query_conditions"> 
-		<if test="query.name != null and query.name!=''">
-			and name = #{query.name}
+		<trim prefixOverrides="and">
+			<if test="query.name != null and query.name!=''">
+				and name = #{query.name}
+			</if>
+			<if test="query.weight != null">
+				and weight = #{query.weight}
+			</if>
+			<if test="query.department != null">
+				and department = #{query.department}
+			</if>
+			<if test="query.gender != null and query.gender!=''">
+				and gender = #{query.gender}
+			</if>
+		</trim> 
+	</sql>
+
+	<sql id="full_query_conditions"> 
+		<where>
+			<include refid="query_conditions"/>
+		</where>
+		<if test="query.orderBy != null and query.orderBy !=''">
+			Order by ${query.orderBy} ${query.order}
 		</if>
-		<if test="query.weight != null">
-			and weight = #{query.weight}
-		</if>
-		<if test="query.department != null">
-			and department = #{query.department}
-		</if>
-		<if test="query.gender != null and query.gender!=''">
-			and gender = #{query.gender}
+		<if test="query.numPerPage != null">
+			Limit #{query.offSet},#{query.numPerPage}
 		</if> 
 	</sql>
 
