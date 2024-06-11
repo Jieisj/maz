@@ -1,1 +1,1 @@
-MVC Code Generator(Srping boot, Mybatis, mysql)
+MVC Code Generator(Srping boot, Mybatis, Mysql)
