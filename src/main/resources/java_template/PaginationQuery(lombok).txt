@@ -3,10 +3,10 @@ import lombok.Setter;
 
 public class PaginationQuery {
     @Getter
-    private Integer page;
+    private Integer page = 1;
     @Getter
     @Setter
-    private Integer numPerPage;
+    private Integer numPerPage = Integer.MAX_VALUE;
     @Getter
     private long offset = 0;
     @Getter
@@ -21,7 +21,7 @@ public class PaginationQuery {
 
     public void setPage(Integer page) {
         Integer numPerPage = getNumPerPage();
-        setOffSet((long) numPerPage * page - numPerPage);
+        setOffset((long) numPerPage * page - numPerPage);
         this.page = page;
     }
 
@@ -43,7 +43,7 @@ public class PaginationQuery {
         this.desc = desc;
     }
 
-    private void setOffSet(long offSet) {
+    private void setOffset(long offset) {
         this.offset = offset;
     }
 }

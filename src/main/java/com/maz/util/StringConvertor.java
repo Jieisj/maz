@@ -54,4 +54,15 @@ public class StringConvertor {
         }
         return str;
     }
+
+    public static String getJavaAsBasePackage(String path){
+        if (path.split("/java").length > 1){
+            String packagePath = path.split("/java")[1];
+            if (packagePath != null){
+                return packagePath.replace("/", ".").substring(1);
+            }
+            return "";
+        }
+        return "";
+    }
 }

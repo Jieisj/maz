@@ -1,6 +1,13 @@
 package com.maz.app;
 
 import com.maz.builder.*;
+import com.maz.builder.config.MyBatisConfig;
+import com.maz.builder.dao.Mapper;
+import com.maz.builder.entity.POJO;
+import com.maz.builder.entity.Query;
+import com.maz.builder.entity.Response;
+import com.maz.builder.service.Service;
+import com.maz.builder.service.ServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +27,10 @@ public class Application {
         Query.buildQueryFromTables(tables);
         Mapper.buildMapperFromTables(tables);
         XML.buildMapperXMLFromTables(tables);
+        Service.buildServiceFromTables(tables);
+        ServiceImpl.buildServiceImplFromTables(tables);
+        MyBatisConfig.buildMybatisConfig();
+        Response.buildResponse();
         long timeSpend  = System.nanoTime() - time;
         logger.info("Application Finished in {} ns", timeSpend);
     }

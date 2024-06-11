@@ -1,6 +1,7 @@
-package com.maz.builder;
+package com.maz.builder.entity;
 
 import com.maz.bean.Table;
+import com.maz.builder.Template;
 import com.maz.util.Constructor;
 import com.maz.util.Property;
 import org.slf4j.Logger;
@@ -10,7 +11,7 @@ import java.io.*;
 import java.util.Set;
 
 public class Query {
-    private static final Logger logger = LoggerFactory.getLogger("builder.QueryBuilder");
+    private static final Logger logger = LoggerFactory.getLogger("builder.Query");
 
     static {
         // create page query template
@@ -50,7 +51,7 @@ public class Query {
                 BufferedWriter bw = new BufferedWriter(outputStreamWriter)) {
                 String importInfo = Constructor.consPoOrQueryImport(table);
                 String extend = " extends PaginationQuery";
-                String constructedQuery = Constructor.constructEntity
+                String constructedQuery = Constructor.constructPoQueryEntity
                         (table, table.getQueryParamName(), extend, Property.getQueryPackage(), importInfo, isIgnoreComm,useLombok);
                 bw.write(constructedQuery);
                 bw.flush();
@@ -65,7 +66,8 @@ public class Query {
     public static void buildQueryFromTables(Set<Table> tables){
         logger.info("------------------------------Query-----------------------------");
         logger.info("Initializing Building Query...");
-        logger.info("PathSource: {}", Property.getSourcePath());
+        logger.info("SourcePath: {}", Property.getSourcePath());
+        logger.info("JavaPath: {}", Property.getJavaPath());
         logger.info("PackageBase: {}", Property.getBasePackage());
         logger.info("QueryPackage: {}", Property.getQueryPackage());
         logger.info("QueryPath: {}", Property.getQueryPath());

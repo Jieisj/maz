@@ -1,7 +1,8 @@
-package com.maz.builder;
+package com.maz.builder.dao;
 
 import com.maz.bean.Field;
 import com.maz.bean.Table;
+import com.maz.builder.Template;
 import com.maz.util.Constructor;
 import com.maz.util.Property;
 import com.maz.util.StringConvertor;
@@ -66,8 +67,6 @@ public class Mapper {
     public static void buildMapperFromTables(Set<Table> tables) {
         logger.info("------------------------------Mapper-----------------------------");
         logger.info("Initializing Building Mapper...");
-        logger.info("PathSource: {}", Property.getSourcePath());
-        logger.info("BasePackage: {}", Property.getBasePackage());
         logger.info("MapperPackage: {}", Property.getMapperPackage());
         logger.info("MapperPath: {}", Property.getMapperPath());
         logger.info("Start Building...");
@@ -133,10 +132,10 @@ public class Mapper {
         String importInfo = "import org.apache.ibatis.annotations.Param;\n";
         String start = String.format("\npublic interface %s extends %s{\n%s", table.getBeanName() + "Mapper<T,P>", "GenericMapper<T,P>", content);
         String close = "}";
-        if (packageInfo == null || packageInfo.isEmpty()) {
+        if (packageInfo.isEmpty()) {
             return start + importInfo + close;
         }
-        packageInfo = Constructor.consPackage(packageInfo) + "\n";
+        packageInfo = Constructor.consPackage(packageInfo) + "\n\n";
         return packageInfo + importInfo + start + close;
     }
 

@@ -49,7 +49,7 @@ public class Property {
     }
 
     public static String getDbDriver() {
-        return getPropertiesKey("db.driver");
+        return getPropertiesKey("db.driver.name");
     }
 
     public static String getSqlType() {
@@ -57,10 +57,10 @@ public class Property {
     }
 
     public static boolean getIsIgnorePrefix() {
-        if (getPropertiesKey("entity.ignore.comment") == null) {
+        if (getPropertiesKey("entity.ignore.table_prefix") == null) {
             return true;
         }
-        String ignoreComm = getPropertiesKey("entity.ignore.comment");
+        String ignoreComm = getPropertiesKey("entity.ignore.table_prefix");
         return Boolean.parseBoolean(ignoreComm);
     }
 
@@ -83,7 +83,7 @@ public class Property {
     }
 
     public static String getQuerySuffix() {
-        return getPropertiesKey("entity.query.suffix") == null ? "" : getPropertiesKey("entity.query.suffix");
+        return getPropertiesKey("entity.query.suffix") == null ? "Query" : getPropertiesKey("entity.query.suffix");
     }
 
     public static String getSourcePath() {
@@ -94,7 +94,7 @@ public class Property {
         return getPropertiesKey("source.path");
     }
 
-    public static String getResourcePath() {
+    public static String getResourcesPath() {
         String key = getPropertiesKey("resources.path");
         if (key == null || key.isEmpty()) {
             throw new MissingResourceException("Missing Resource Path in Properties File", "application.properties", "resource.path");
@@ -103,56 +103,34 @@ public class Property {
     }
 
     public static String getQueryPath() {
-        String key = getPropertiesKey("entity.query.path");
-        if (key == null || key.isEmpty()) {
-            if (getBasePackage().isEmpty()) {
-                return getSourcePath() + "/" + packageToPath(getQueryPackage());
-            } else {
-                return getSourcePath() + "/" + packageToPath(getBasePackage()) + "/" + packageToPath(getQueryPackage());
-            }
-        }
-        return key;
+        return getJavaPath() + "/" + packageToPath(getQueryPackage());
+    }
+
+    public static String getJavaPath() {
+        return getSourcePath().split("/java")[0] + "/java";
     }
 
     public static String getMapperPath() {
-        String key = getPropertiesKey("mapper.path");
-        if (key == null || key.isEmpty()) {
-            if (getBasePackage().isEmpty()) {
-                return getSourcePath() + "/" + packageToPath(getMapperPackage());
-            } else {
-                return getSourcePath() + "/" + packageToPath(getBasePackage()) + "/" + packageToPath(getMapperPackage());
-            }
-        }
-        return key;
+        return getJavaPath() + "/" + packageToPath(getMapperPackage());
     }
 
     public static String getPoPath() {
-        String key = getPropertiesKey("entity.po.path");
-        if (key == null || key.isEmpty()) {
-            if (getBasePackage().isEmpty()) {
-                return getSourcePath() + "/" + packageToPath(getPoPackage());
-            } else {
-                return getSourcePath() + "/" + packageToPath(getBasePackage()) + "/" + packageToPath(getPoPackage());
-            }
-        }
-        return key;
+        return getJavaPath() + "/" + packageToPath(getPoPackage());
+
     }
 
     public static String getXMLPath() {
-        String key = getPropertiesKey("mapper.xml.path");
-        if (key == null || key.isEmpty()) {
-            if (getBasePackage().isEmpty()) {
-                return getResourcePath() + "/" + packageToPath(getMapperPackage());
-            } else {
-                return getResourcePath() + "/" + packageToPath(getBasePackage()) + "/" + packageToPath(getMapperPackage());
-            }
-        }
-        return key;
+        return getResourcesPath() + "/" + packageToPath(getMapperPackage());
     }
 
     public static String getBasePackage() {
-        return getPropertiesKey("base.package") == null || getPropertiesKey("base.package").isEmpty() ? "" :
-                getPropertiesKey("base.package");
+        String basePackage = "";
+        if (getSourcePath().split("/java").length > 1) {
+            basePackage = getSourcePath().split("/java")[1].replace("/", ".").substring(1);
+            return getPropertiesKey("base.package") == null || getPropertiesKey("base.package").isEmpty()?
+                    basePackage : basePackage + "." + getPropertiesKey("base.package");
+        }
+        return getPropertiesKey("base.package") == null ? basePackage : getPropertiesKey("base.package");
     }
 
     public static String getPoPackage() {
@@ -175,14 +153,55 @@ public class Property {
         }
     }
 
+    public static String getResponsePackage(){
+        String key = getPropertiesKey("entity.response.package");
+        if (key == null || key.isEmpty()){
+            return getBasePackage().isEmpty() ? "response" : getBasePackage() + ".response";
+        }else {
+            return getBasePackage().isEmpty() ? key : getBasePackage() + "." + key;
+        }
+    }
+
+    public static String getResponsePath(){
+        return getJavaPath() + "/" + packageToPath(getResponsePackage());
+    }
+
     public static String getMapperPackage() {
         String key = getPropertiesKey("mapper.package");
         if (key == null || key.isEmpty()) {
-            return getBasePackage().isEmpty() ? "mapper" : getBasePackage();
+            return getBasePackage().isEmpty() ? "mapper" : getBasePackage() + ".mapper";
         } else {
             return getBasePackage().isEmpty() ? key :
                     getBasePackage() + "." + key;
         }
+    }
+
+    public static String getServicePackage() {
+        String key = getPropertiesKey("service.package");
+        if (key == null || key.isEmpty()) {
+            return getBasePackage().isEmpty() ? "service" : getBasePackage() + ".service";
+        } else {
+            return getBasePackage().isEmpty() ? key :
+                    getBasePackage() + "." + key;
+        }
+    }
+
+    public static String getServiceImplPackage() {
+        String key = getPropertiesKey("service.impl.package");
+        if (key == null || key.isEmpty()) {
+            return getBasePackage().isEmpty() ? "service.impl" : getBasePackage() + ".service.impl";
+        } else {
+            return getBasePackage().isEmpty() ? key :
+                    getBasePackage() + "." + key;
+        }
+    }
+
+    public static String getServiceImplPath() {
+        return getJavaPath() + "/" + packageToPath(getServiceImplPackage());
+    }
+
+    public static String getServicePath() {
+        return getJavaPath() + "/" + packageToPath(getServicePackage());
     }
 
     public static boolean getUseLombok() {
@@ -192,6 +211,19 @@ public class Property {
         }
         return Boolean.parseBoolean(key);
     }
+
+    public static String getMybatisConfigPath(){
+        String key = getPropertiesKey("mybatis.config.path");
+        if (key == null){
+            return getSourcePath();
+        }
+        return key;
+    }
+
+    public static String getMybatisConfigPackage(){
+        return StringConvertor.getJavaAsBasePackage(getMybatisConfigPath());
+    }
+
 
     public static String packageToPath(String packName) {
         return packName.replaceAll("\\.", "/");

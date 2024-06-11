@@ -1,6 +1,7 @@
 package com.maz.builder;
 
 import com.maz.bean.Field;
+import com.maz.builder.dao.Mapper;
 import com.maz.util.Property;
 import com.maz.bean.Table;
 
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 public class XML {
-    private static Logger logger = LoggerFactory.getLogger("builder.BuilderBase");
+    private static Logger logger = LoggerFactory.getLogger("builder.Mapper");
     private static final String REF_NON_AUTO_SET_PARAMS = "non_auto_set_params";
     private static final String REF_FULL_COLUMNS = "full_columns";
     private static final String REF_NON_AUTO_COLUMNS = "non_auto_columns";
@@ -37,19 +38,17 @@ public class XML {
     public static void buildMapperXML(Table table) {
         String mapperXMLPath = Property.getXMLPath();
         File mapperXMLDir = new File(mapperXMLPath);
-        System.out.println(mapperXMLPath);
         File mapperXMLFile = new File(mapperXMLPath + "/" + table.getPojoParamName() + "Mapper.xml");
-        System.out.println(mapperXMLFile);
         if (mapperXMLDir.mkdirs()) {
-            logger.info("Mapper XML Director Created");
+            logger.info("Mapper XML Directory :{} Created", mapperXMLDir.toPath());
         } else {
-            logger.info("Mapper XML Director Have Existed");
+            logger.info("Mapper XML Director :{} Have Existed", mapperXMLDir.toPath());
         }
         try {
             if (mapperXMLFile.createNewFile()) {
-                logger.info("Mapper XML File Created");
+                logger.info("Mapper XML File :{} Created", mapperXMLFile.toPath());
             } else {
-                logger.info("Mapper XML File Have Existed");
+                logger.info("Mapper XML File :{} Have Existed", mapperXMLFile.toPath());
             }
         } catch (IOException e) {
             logger.info("Mapper XML File Creation Failed");
@@ -66,21 +65,21 @@ public class XML {
             bw.write(template);
             bw.flush();
         } catch (IOException e) {
-            logger.error("Mapper XML File Input Failed");
+            logger.error("Mapper XML Output File :{} Failed", mapperXMLFile);
         }
     }
 
     public static void buildMapperXMLFromTables(Set<Table> tables) {
         logger.info("----------------------------MapperXML-------------------------------");
         logger.info("Initializing Building MapperXML...");
-        logger.info("pathResource: {}", Property.getResourcePath());
-        logger.info("MapperPackage: {}", Property.getMapperPackage());
-        logger.info("PathMapperXML: {}", Property.getXMLPath());
+        logger.info("ResourcesPath: {}", Property.getResourcesPath());
+        logger.info("MapperXlmPackage: {}", Property.getMapperPackage());
+        logger.info("MapperXmlPath: {}", Property.getXMLPath());
         logger.info("Start Building...");
         for (Table table : tables) {
             buildMapperXML(table);
         }
-        logger.info("Building Mapper XML File Finished :D ~!!!!");
+        logger.info("Building Mapper XML File Finished");
     }
 
     private static String buildMapperTemplate(String fullPackageName, StringBuilder contentSb) {
@@ -339,7 +338,7 @@ public class XML {
                 "\n\t\t\tOrder by ${query.orderBy} ${query.order}"
         );
         String ifTag2 = String.format("\n\t\t<if test=\"query.numPerPage != null\">%s\n\t\t</if>",
-                "\n\t\t\tLimit #{query.offSet},#{query.numPerPage}");
+                "\n\t\t\tLimit #{query.offset},#{query.numPerPage}");
         return String.format("%s%s%s", whereTag, ifTag, ifTag2);
     }
 
@@ -390,9 +389,9 @@ public class XML {
     }
 
     private static String genericSelectList(Table table) {
-        String queryPackage = Property.getQueryPackage();
-        String queryParamName = table.getQueryParamName();
-        String fullQualifiedName = queryPackage + "." + queryParamName;
+        String poPackage = Property.getPoPackage();
+        String pojoParamName = table.getPojoParamName();
+        String fullQualifiedName = poPackage + "." + pojoParamName;
         String includeTag = createIncludeTag(REF_FULL_QUERY_CONDITIONS);
         String sql = String.format("\n\t\tselect * from %s %s", table.getName(), includeTag);
         return String.format("\n\n\t<select id=\"selectList\" resultType=\"%s\"> %s \n\t</select>", fullQualifiedName, sql);
@@ -476,7 +475,7 @@ public class XML {
         List<Field> fields = table.getFields();
         for (Field field : fields) {
             if (!field.isAutoIncrement()) {
-                sb.append(String.format("\n\t\t\t<if test=\"%s != null\">%s</if>", "insert." + field.getName(), field.getName() + ","));
+                sb.append(String.format("\n\t\t\t<if test=\"%s != null\">%s</if>", "insert." + field.getPropertyName(), field.getName() + ","));
             }
         }
         String ifTags = sb.toString();
@@ -488,7 +487,7 @@ public class XML {
         List<Field> fields = table.getFields();
         for (Field field : fields) {
             if (!field.isAutoIncrement()) {
-                sb.append(String.format("\n\t\t\t<if test=\"%s != null\">%s</if>", "insert." + field.getName(), "#{insert." + field.getPropertyName() + "},"));
+                sb.append(String.format("\n\t\t\t<if test=\"%s != null\">%s</if>", "insert." + field.getPropertyName(), "#{insert." + field.getPropertyName() + "},"));
             }
         }
         String ifTags = sb.toString();
